@@ -8,15 +8,15 @@ server {
     add_header Content-Security-Policy "frame-ancestors 'self'" always;
     add_header X-Content-Type-Options nosniff always;
 
-    location = /modulos/exemplo {
-        return 301 /modulos/exemplo/;
+    location = /modulos/crm {
+        return 301 /modulos/crm/;
     }
 
-    location /modulos/exemplo/ {
-        try_files $uri $uri/ /modulos/exemplo/index.html;
+    location /modulos/crm/ {
+        try_files $uri $uri/ /modulos/crm/index.html;
     }
 
-    location /modulos/exemplo/assets/ {
+    location /modulos/crm/assets/ {
         add_header Cache-Control "public, max-age=31536000, immutable" always;
         add_header Content-Security-Policy "frame-ancestors 'self'" always;
     }

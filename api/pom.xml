@@ -11,12 +11,11 @@
         <relativePath/>
     </parent>
 
-    <!-- Ao copiar: troque "exemplo" pelo código do seu módulo aqui, no pacote Java e no application.yml -->
     <groupId>br.com.plataforma</groupId>
-    <artifactId>exemplo</artifactId>
+    <artifactId>crm</artifactId>
     <version>0.1.0</version>
-    <name>exemplo</name>
-    <description>Módulo de exemplo da plataforma — ponto de partida para os grupos</description>
+    <name>crm</name>
+    <description>Módulo CRM — Projeto Integrador 2026, Centinela Soluções Digitais</description>
 
     <properties>
         <java.version>21</java.version>

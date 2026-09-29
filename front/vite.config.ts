@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 // Ao copiar: troque pelo código do seu módulo e pela porta do Contrato §13.3.
-const CODIGO = 'exemplo'
-const PORTA = 3090
+const CODIGO = 'crm'
+const PORTA = 3002
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '')

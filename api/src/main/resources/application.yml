@@ -1,45 +1,43 @@
-# Toda configuração que muda por ambiente vem de variável (Contrato §13.3).
-# Os valores depois de ":" servem para rodar na máquina com o docker compose do infra.
 server:
-  port: ${SERVER_PORT:8090}
-  max-http-request-header-size: 32KB   # token de ADMINISTRADOR pode passar de 8 KB (Contrato §4.4)
+  port: ${SERVER_PORT:8082}
+  max-http-request-header-size: 32KB
 
 modulo:
-  codigo: exemplo
+  codigo: crm
 
 spring:
   application:
-    name: exemplo
+    name: crm
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/plataforma}
-    username: ${DB_APP_USER:usr_exemplo}
+    username: ${DB_APP_USER:usr_crm}
     password: ${DB_APP_PASSWORD:troque}
 
   flyway:
-    user: ${DB_OWNER_USER:own_exemplo}          # migrations rodam com o dono do schema (Contrato §7.1)
+    user: ${DB_OWNER_USER:own_crm}
     password: ${DB_OWNER_PASSWORD:troque}
-    schemas: exemplo
-    default-schema: exemplo
-    create-schemas: false                        # o schema já foi criado pelo infra
+    schemas: crm
+    default-schema: crm
+    create-schemas: false
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none                             # estrutura só por migration
+      ddl-auto: none
     properties:
       hibernate:
-        default_schema: exemplo
+        default_schema: crm
 
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     virtual-host: ${RABBITMQ_VHOST:plataforma}
-    username: ${RABBITMQ_USER:mq_exemplo}
+    username: ${RABBITMQ_USER:mq_crm}
     password: ${RABBITMQ_PASSWORD:troque}
     listener:
       simple:
-        default-requeue-rejected: false          # esgotadas as tentativas, vai para a .dlq
+        default-requeue-rejected: false
         retry:
           enabled: true
           max-attempts: 3

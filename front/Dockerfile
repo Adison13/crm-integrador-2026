@@ -1,4 +1,4 @@
-# Imagem do front do módulo, servida sob /modulos/exemplo/ (Contrato §12.8).
+# Imagem do front do módulo, servida sob /modulos/crm/ (Contrato §12.8).
 FROM node:22-alpine AS build
 WORKDIR /src
 COPY package.json package-lock.json ./
@@ -7,7 +7,7 @@ COPY . .
 RUN npm run build
 
 FROM nginx:1.27-alpine
-ENV PORTA=3090
+ENV PORTA=3002
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
-COPY --from=build /src/dist /usr/share/nginx/html/modulos/exemplo
-EXPOSE 3090
+COPY --from=build /src/dist /usr/share/nginx/html/modulos/crm
+EXPOSE 3002
