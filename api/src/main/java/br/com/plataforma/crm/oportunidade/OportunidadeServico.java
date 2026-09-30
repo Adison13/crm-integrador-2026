@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -138,6 +139,27 @@ public class OportunidadeServico {
     @Transactional
     public void excluir(UUID id, Recorte recorte) {
         oportunidades.delete(buscar(id, recorte));
+    }
+
+    /**
+     * Oportunidade dentro do recorte do usuário; fora dele, 404 como registro de outro tenant.
+     * Sem @Transactional de propósito: roda na transação de quem chama, sem marcá-la para rollback.
+     */
+    public Oportunidade visivel(UUID id, Recorte recorte) {
+        return buscar(id, recorte);
+    }
+
+    public Optional<Oportunidade> buscarVisivel(UUID id, Recorte recorte) {
+        return oportunidades.buscarPorId(id).filter(recorte::enxerga);
+    }
+
+    /** Próximo passo definido fora da tela da oportunidade, como no registro pós-reunião. */
+    @Transactional
+    public void definirProximoPasso(UUID id, Recorte recorte, String proximoPasso, LocalDate data) {
+        Oportunidade o = buscar(id, recorte);
+        if (o.estaAberta()) {
+            o.definirProximoPasso(proximoPasso, data, recorte.usuarioId());
+        }
     }
 
     private Oportunidade buscar(UUID id, Recorte recorte) {

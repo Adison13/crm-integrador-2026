@@ -26,7 +26,7 @@ public record Recorte(boolean todas, UUID usuarioId, List<UUID> equipes) {
         return new Recorte(todas, usuario, equipes);
     }
 
-    boolean enxerga(Oportunidade o) {
+    public boolean enxerga(Oportunidade o) {
         return todas
                 || o.getResponsavelId() == null
                 || o.getResponsavelId().equals(usuarioId)

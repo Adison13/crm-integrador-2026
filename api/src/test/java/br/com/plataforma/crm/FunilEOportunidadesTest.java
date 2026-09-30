@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,16 +15,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.jayway.jsonpath.JsonPath;
 
@@ -348,15 +343,5 @@ class FunilEOportunidadesTest extends BaseIntegracao {
     private static String oportunidade(String empresa, String extra) {
         return "{\"titulo\":\"Backup gerenciado\",\"empresaId\":\"" + empresa + "\""
                 + (extra.isEmpty() ? "" : "," + extra) + "}";
-    }
-
-    private static RequestPostProcessor pessoa(UUID tenant, UUID sub, List<String> equipes, String... permissoes) {
-        return jwt()
-                .jwt(token -> token
-                        .subject(sub.toString())
-                        .claim("tenant_id", tenant.toString())
-                        .claim("equipes", equipes)
-                        .claim("perms", List.of(permissoes)))
-                .authorities(Arrays.stream(permissoes).map(SimpleGrantedAuthority::new).toArray(GrantedAuthority[]::new));
     }
 }

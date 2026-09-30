@@ -150,6 +150,12 @@ public class Oportunidade implements Persistable<UUID> {
         tocar(usuario);
     }
 
+    public void definirProximoPasso(String proximoPasso, LocalDate dataProximoPasso, UUID usuario) {
+        this.proximoPasso = proximoPasso;
+        this.dataProximoPasso = dataProximoPasso;
+        tocar(usuario);
+    }
+
     public void ganhar(UUID usuario) {
         fechar(GANHA, usuario);
     }

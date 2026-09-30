@@ -68,6 +68,17 @@ public abstract class BaseIntegracao {
                 .authorities(autoridades(permissoes));
     }
 
+    /** Token de um usuário conhecido, com as equipes do claim equipes (Contrato §5.4). */
+    protected static RequestPostProcessor pessoa(UUID tenant, UUID sub, List<String> equipes, String... permissoes) {
+        return jwt()
+                .jwt(token -> token
+                        .subject(sub.toString())
+                        .claim("tenant_id", tenant.toString())
+                        .claim("equipes", equipes)
+                        .claim("perms", List.of(permissoes)))
+                .authorities(autoridades(permissoes));
+    }
+
     private static GrantedAuthority[] autoridades(String... permissoes) {
         return Arrays.stream(permissoes).map(SimpleGrantedAuthority::new).toArray(GrantedAuthority[]::new);
     }
