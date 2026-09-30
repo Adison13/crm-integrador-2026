@@ -16,4 +16,9 @@ public record Resposta<T>(boolean success, T data, String message, List<ErroCamp
     public static <T> Resposta<T> falha(String mensagem, List<ErroCampo> erros) {
         return new Resposta<>(false, null, mensagem, erros);
     }
+
+    /** Falha que ainda devolve dado útil, como o id do registro que já existe num 409. */
+    public static <T> Resposta<T> falha(String mensagem, T data, List<ErroCampo> erros) {
+        return new Resposta<>(false, data, mensagem, erros);
+    }
 }

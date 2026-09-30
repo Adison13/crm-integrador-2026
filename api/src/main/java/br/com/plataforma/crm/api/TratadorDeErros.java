@@ -1,6 +1,8 @@
 package br.com.plataforma.crm.api;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import br.com.plataforma.crm.contato.ContatoDuplicadoException;
 import br.com.plataforma.crm.empresa.EmpresaDuplicadaException;
 
 /** Converte toda exceção no envelope padrão, com o código HTTP da §8.4. */
@@ -42,10 +45,25 @@ public class TratadorDeErros {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Resposta.falha(e.getMessage()));
     }
 
+    @ExceptionHandler(CampoInvalidoException.class)
+    ResponseEntity<Resposta<Void>> campoInvalido(CampoInvalidoException e) {
+        ErroCampo erro = new ErroCampo(e.getCampo(), e.getCodigo(), e.getMessage());
+        return ResponseEntity.badRequest().body(Resposta.falha("Não foi possível salvar: confira os campos.", List.of(erro)));
+    }
+
+    /** O chamador reaproveita o id devolvido em vez de tratar como erro (Contrato §12.7). */
     @ExceptionHandler(EmpresaDuplicadaException.class)
-    ResponseEntity<Resposta<Void>> empresaDuplicada(EmpresaDuplicadaException e) {
-        ErroCampo erro = new ErroCampo("cnpj", "CNPJ_DUPLICADO", "Empresa existente: " + e.getEmpresaId());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Resposta.falha(e.getMessage(), List.of(erro)));
+    ResponseEntity<Resposta<Map<String, UUID>>> empresaDuplicada(EmpresaDuplicadaException e) {
+        ErroCampo erro = new ErroCampo("cnpj", "EMPRESA_DUPLICADA", "CNPJ já cadastrado para este tenant.");
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Resposta.falha(e.getMessage(), Map.of("empresaId", e.getEmpresaId()), List.of(erro)));
+    }
+
+    @ExceptionHandler(ContatoDuplicadoException.class)
+    ResponseEntity<Resposta<Map<String, UUID>>> contatoDuplicado(ContatoDuplicadoException e) {
+        ErroCampo erro = new ErroCampo("email", "CONTATO_DUPLICADO", "E-mail já cadastrado para esta empresa.");
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Resposta.falha(e.getMessage(), Map.of("contatoId", e.getContatoId()), List.of(erro)));
     }
 
     /** Duas gravações simultâneas com o mesmo CNPJ: a segunda esbarra no índice único do banco. */

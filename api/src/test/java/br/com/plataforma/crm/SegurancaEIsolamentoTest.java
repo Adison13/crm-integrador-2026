@@ -125,9 +125,9 @@ class SegurancaEIsolamentoTest extends BaseIntegracao {
     }
 
     @Test
-    void cnpjDuplicadoNoMesmoTenantResponde409() throws Exception {
+    void cnpjDuplicadoNoMesmoTenantResponde409ComOIdExistente() throws Exception {
         UUID tenant = UUID.randomUUID();
-        criarEmpresa(tenant, "Original", "11222333000181");
+        String original = criarEmpresa(tenant, "Original", "11222333000181");
 
         mvc.perform(post(EMPRESAS)
                         .with(usuario(tenant, CRIAR))
@@ -135,7 +135,9 @@ class SegurancaEIsolamentoTest extends BaseIntegracao {
                         .content(corpo("Copia", "11222333000181", "")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.errors[0].campo").value("cnpj"));
+                .andExpect(jsonPath("$.data.empresaId").value(original))
+                .andExpect(jsonPath("$.errors[0].campo").value("cnpj"))
+                .andExpect(jsonPath("$.errors[0].codigo").value("EMPRESA_DUPLICADA"));
     }
 
     @Test

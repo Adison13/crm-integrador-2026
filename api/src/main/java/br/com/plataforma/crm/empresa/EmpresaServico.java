@@ -15,9 +15,11 @@ import br.com.plataforma.crm.api.NaoEncontradoException;
 public class EmpresaServico {
 
     private final EmpresaRepositorio empresas;
+    private final UnidadeRepositorio unidades;
 
-    public EmpresaServico(EmpresaRepositorio empresas) {
+    public EmpresaServico(EmpresaRepositorio empresas, UnidadeRepositorio unidades) {
         this.empresas = empresas;
+        this.unidades = unidades;
     }
 
     @Transactional(readOnly = true)
@@ -28,6 +30,12 @@ public class EmpresaServico {
     @Transactional(readOnly = true)
     public Empresa buscar(UUID id) {
         return empresas.buscarPorId(id).orElseThrow(() -> new NaoEncontradoException("Empresa não encontrada."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Unidade> unidades(UUID empresaId) {
+        buscar(empresaId);
+        return unidades.daEmpresa(empresaId);
     }
 
     @Transactional(readOnly = true)

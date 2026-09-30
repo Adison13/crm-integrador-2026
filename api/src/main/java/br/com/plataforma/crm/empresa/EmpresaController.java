@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.plataforma.crm.api.Lotes;
 import br.com.plataforma.crm.api.Pagina;
 import br.com.plataforma.crm.api.Resposta;
 import br.com.plataforma.crm.seguranca.Usuarios;
@@ -62,7 +63,13 @@ public class EmpresaController {
     @GetMapping("/resumo")
     @PreAuthorize("hasAuthority('crm.empresa.ver_resumo')")
     public Resposta<List<EmpresaResumoDto>> resumoEmLote(@RequestParam List<UUID> ids) {
-        return Resposta.ok(servico.buscarPorIds(ids).stream().map(EmpresaResumoDto::de).toList());
+        return Resposta.ok(servico.buscarPorIds(Lotes.validar(ids)).stream().map(EmpresaResumoDto::de).toList());
+    }
+
+    @GetMapping("/{id}/unidades")
+    @PreAuthorize("hasAuthority('crm.empresa.ver')")
+    public Resposta<List<UnidadeDto>> unidades(@PathVariable UUID id) {
+        return Resposta.ok(servico.unidades(id).stream().map(UnidadeDto::de).toList());
     }
 
     @PostMapping
