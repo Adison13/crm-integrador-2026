@@ -1,10 +1,10 @@
 package br.com.plataforma.crm.atividade;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -52,8 +52,8 @@ public class ReuniaoController {
     @PreAuthorize("hasAuthority('crm.oportunidade.editar')")
     public ResponseEntity<Resposta<ReuniaoDto>> agendar(@PathVariable UUID id, @Valid @RequestBody NovaReuniao corpo,
                                                         @AuthenticationPrincipal Jwt jwt, Authentication autenticacao) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Resposta.ok(servico.agendar(id, corpo, Recorte.de(jwt, autenticacao))));
+        ReuniaoDto criado = servico.agendar(id, corpo, Recorte.de(jwt, autenticacao));
+        return ResponseEntity.created(URI.create("/api/crm/reunioes/" + criado.id())).body(Resposta.ok(criado));
     }
 
     @PutMapping("/reunioes/{id}")

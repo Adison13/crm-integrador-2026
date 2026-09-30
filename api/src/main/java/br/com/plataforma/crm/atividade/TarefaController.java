@@ -1,10 +1,10 @@
 package br.com.plataforma.crm.atividade;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -55,8 +55,8 @@ public class TarefaController {
     @PreAuthorize("hasAuthority('crm.oportunidade.editar')")
     public ResponseEntity<Resposta<TarefaDto>> criar(@Valid @RequestBody NovaTarefa corpo,
                                                      @AuthenticationPrincipal Jwt jwt, Authentication autenticacao) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Resposta.ok(servico.criar(corpo, Recorte.de(jwt, autenticacao))));
+        TarefaDto criado = servico.criar(corpo, Recorte.de(jwt, autenticacao));
+        return ResponseEntity.created(URI.create("/api/crm/tarefas/" + criado.id())).body(Resposta.ok(criado));
     }
 
     @PutMapping("/tarefas/{id}")

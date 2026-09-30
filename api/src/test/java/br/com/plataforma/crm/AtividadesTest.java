@@ -1,9 +1,11 @@
 package br.com.plataforma.crm;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -229,13 +231,16 @@ class AtividadesTest extends BaseIntegracao {
     private void registrarAtividade(UUID tenant, UUID usuario, String oportunidade, String corpo) throws Exception {
         mvc.perform(post("/api/crm/oportunidades/" + oportunidade + "/atividades").with(pessoa(tenant, usuario, List.of(), VENDEDOR))
                         .contentType(MediaType.APPLICATION_JSON).content(corpo))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", startsWith("/api/crm/atividades/")));
     }
 
     private String criarTarefa(UUID tenant, UUID usuario, String corpo) throws Exception {
         return JsonPath.read(mvc.perform(post("/api/crm/tarefas").with(pessoa(tenant, usuario, List.of(), VENDEDOR))
                         .contentType(MediaType.APPLICATION_JSON).content(corpo))
-                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.data.id");
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", startsWith("/api/crm/tarefas/")))
+                .andReturn().getResponse().getContentAsString(), "$.data.id");
     }
 
     private String agendarReuniao(UUID tenant, UUID usuario, String oportunidade, OffsetDateTime quando) throws Exception {
@@ -243,12 +248,14 @@ class AtividadesTest extends BaseIntegracao {
                         .with(pessoa(tenant, usuario, List.of(), VENDEDOR))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"dataHora\":\"" + quando + "\",\"participantes\":\"Sócio e TI\",\"pauta\":\"Diagnóstico\"}"))
-                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.data.id");
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", startsWith("/api/crm/reunioes/"))).andReturn().getResponse().getContentAsString(), "$.data.id");
     }
 
     private void registrarObjecao(UUID tenant, UUID usuario, String oportunidade, String motivo) throws Exception {
         mvc.perform(post("/api/crm/oportunidades/" + oportunidade + "/objecoes").with(pessoa(tenant, usuario, List.of(), VENDEDOR))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"motivo\":\"" + motivo + "\"}"))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", startsWith("/api/crm/objecoes/")));
     }
 }

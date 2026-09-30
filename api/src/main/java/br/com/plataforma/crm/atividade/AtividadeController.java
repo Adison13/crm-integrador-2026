@@ -1,10 +1,10 @@
 package br.com.plataforma.crm.atividade;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -48,8 +48,8 @@ public class AtividadeController {
     @PreAuthorize("hasAuthority('crm.oportunidade.editar')")
     public ResponseEntity<Resposta<AtividadeDto>> registrar(@PathVariable UUID id, @Valid @RequestBody NovaAtividade corpo,
                                                             @AuthenticationPrincipal Jwt jwt, Authentication autenticacao) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Resposta.ok(servico.registrar(id, corpo, Recorte.de(jwt, autenticacao))));
+        AtividadeDto criado = servico.registrar(id, corpo, Recorte.de(jwt, autenticacao));
+        return ResponseEntity.created(URI.create("/api/crm/atividades/" + criado.id())).body(Resposta.ok(criado));
     }
 
     @DeleteMapping("/atividades/{id}")
@@ -73,8 +73,8 @@ public class AtividadeController {
                                                                  @Valid @RequestBody NovaObjecao corpo,
                                                                  @AuthenticationPrincipal Jwt jwt,
                                                                  Authentication autenticacao) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Resposta.ok(servico.registrarObjecao(id, corpo, Recorte.de(jwt, autenticacao))));
+        ObjecaoDto criado = servico.registrarObjecao(id, corpo, Recorte.de(jwt, autenticacao));
+        return ResponseEntity.created(URI.create("/api/crm/objecoes/" + criado.id())).body(Resposta.ok(criado));
     }
 
     @GetMapping("/objecoes/frequentes")
