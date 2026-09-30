@@ -23,6 +23,10 @@ módulos de Contratos e Financeiro por evento.
 | Unidades | `/empresas/{id}/unidades` | Matriz primeiro |
 | Funis e etapas | `/funis`, `/funis/{id}`, `/funis/{id}/etapas`, `/funis/{id}/etapas/ordem`, `/etapas/{id}` | Funil padrão criado no primeiro acesso do tenant; etapa com oportunidades não é removida |
 | Oportunidades | `/oportunidades`, `/oportunidades/{id}`, `/oportunidades/{id}/mover`, `/ganhar`, `/perder` | Recorte por dono e equipe; próximo passo obrigatório enquanto aberta; motivo obrigatório na perda |
+| Atividades | `/oportunidades/{id}/atividades`, `/atividades/{id}` | Histórico do que já foi feito; não aceita data futura |
+| Tarefas | `/tarefas`, `/tarefas/{id}`, `/tarefas/{id}/concluir`, `/oportunidades/{id}/tarefas` | Minhas tarefas por vencimento e filtro de vencidas; tarefa solta só para quem criou e o responsável |
+| Reuniões | `/reunioes?de=&ate=`, `/oportunidades/{id}/reunioes`, `/reunioes/{id}`, `/reunioes/{id}/registro` | Agenda por período; o registro pós-reunião atualiza o próximo passo e grava as objeções |
+| Objeções | `/oportunidades/{id}/objecoes`, `/objecoes/{id}`, `/objecoes/frequentes` | Biblioteca dos motivos mais registrados no tenant |
 | Busca global | `/busca?q=` | Até 5 resultados de empresas e contatos, no formato comum da casca |
 | Saúde | `/health` | Sem token |
 
@@ -46,7 +50,7 @@ front/   front React + TypeScript (Vite), carregado pela casca da plataforma
 .github/ CI: testes em todo push e publicação das imagens a cada push na main
 ```
 
-Pacotes do back-end: `empresa`, `contato`, `funil`, `oportunidade`, `busca`, `eventos`,
+Pacotes do back-end: `empresa`, `contato`, `funil`, `oportunidade`, `atividade`, `busca`, `eventos`,
 `seguranca`, `tenant` e `api` (envelope, paginação e tratamento de erros).
 
 ## Rodar localmente
@@ -98,7 +102,7 @@ mvn verify
 
 Cobrem autenticação e permissões (401 e 403), isolamento entre tenants, token de serviço,
 duplicidade de empresa e contato, funis e etapas, o ciclo de vida da oportunidade, a publicação
-dos eventos e a busca global.
+dos eventos, a busca global, e atividades, tarefas, reuniões e objeções.
 
 ## Equipe
 
