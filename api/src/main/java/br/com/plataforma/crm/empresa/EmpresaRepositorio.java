@@ -22,10 +22,10 @@ public interface EmpresaRepositorio extends JpaRepository<Empresa, UUID> {
 
     @Query("""
             select e from Empresa e
-            where lower(e.razaoSocial) like lower(concat('%', :termo, '%'))
-               or lower(e.nomeFantasia) like lower(concat('%', :termo, '%'))
-               or e.cnpj like concat('%', :termo, '%')
+            where lower(e.razaoSocial) like :padrao escape '\\'
+               or lower(e.nomeFantasia) like :padrao escape '\\'
+               or e.cnpj like :padrao escape '\\'
             order by e.razaoSocial
             """)
-    List<Empresa> buscarPorTermo(@Param("termo") String termo, Pageable limite);
+    List<Empresa> buscarPorPadrao(@Param("padrao") String padrao, Pageable limite);
 }

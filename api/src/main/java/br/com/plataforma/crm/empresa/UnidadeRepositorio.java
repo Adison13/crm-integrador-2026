@@ -1,6 +1,7 @@
 package br.com.plataforma.crm.empresa;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UnidadeRepositorio extends JpaRepository<Unidade, UUID> {
+
+    @Query("select u from Unidade u where u.id = :id")
+    Optional<Unidade> buscarPorId(@Param("id") UUID id);
 
     @Query("""
             select u from Unidade u

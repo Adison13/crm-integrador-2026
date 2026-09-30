@@ -171,9 +171,13 @@ class SegurancaEIsolamentoTest extends BaseIntegracao {
                 .andExpect(jsonPath("$.data[0].id").value(id))
                 .andExpect(jsonPath("$.data[0].titulo").value("Centinela Soluções Digitais"))
                 .andExpect(jsonPath("$.data[0].subtitulo").value("12.345.678/0001-90"))
-                .andExpect(jsonPath("$.data[0].rota").value("/crm/empresas/" + id));
+                .andExpect(jsonPath("$.data[0].rota").value("/empresas/" + id));
 
         mvc.perform(get("/api/crm/busca").param("q", "c").with(usuario(tenant, VER_RESUMO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].campo").value("q"));
+        mvc.perform(get("/api/crm/busca").param("q", "%%").with(usuario(tenant, VER_RESUMO)))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(0));
     }
 

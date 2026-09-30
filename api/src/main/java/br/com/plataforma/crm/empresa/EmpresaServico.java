@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.plataforma.crm.api.NaoEncontradoException;
+import br.com.plataforma.crm.api.Termos;
 
 @Service
 public class EmpresaServico {
@@ -45,7 +46,7 @@ public class EmpresaServico {
 
     @Transactional(readOnly = true)
     public List<Empresa> buscarPorTermo(String termo) {
-        return empresas.buscarPorTermo(termo.strip(), PageRequest.of(0, 5));
+        return empresas.buscarPorPadrao(Termos.padraoLike(termo), PageRequest.of(0, 5));
     }
 
     @Transactional

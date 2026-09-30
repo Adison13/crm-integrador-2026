@@ -26,9 +26,9 @@ public interface ContatoRepositorio extends JpaRepository<Contato, UUID> {
 
     @Query("""
             select c from Contato c
-            where lower(c.nome) like lower(concat('%', :termo, '%'))
-               or lower(c.email) like lower(concat('%', :termo, '%'))
+            where lower(c.nome) like :padrao escape '\\'
+               or lower(c.email) like :padrao escape '\\'
             order by c.nome
             """)
-    List<Contato> buscarPorTermo(@Param("termo") String termo, Pageable limite);
+    List<Contato> buscarPorPadrao(@Param("padrao") String padrao, Pageable limite);
 }

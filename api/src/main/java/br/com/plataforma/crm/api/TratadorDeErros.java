@@ -29,10 +29,26 @@ public class TratadorDeErros {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<Resposta<Void>> dadosInvalidos(MethodArgumentNotValidException e) {
         List<ErroCampo> erros = e.getBindingResult().getFieldErrors().stream()
-                .map(c -> new ErroCampo(c.getField(), "CAMPO_INVALIDO", c.getDefaultMessage()))
+                .map(c -> new ErroCampo(c.getField(), codigo(c.getCode()), c.getDefaultMessage()))
                 .toList();
         return ResponseEntity.badRequest()
                 .body(Resposta.falha("Não foi possível salvar: confira os campos.", erros));
+    }
+
+    private static String codigo(String restricao) {
+        if ("NotBlank".equals(restricao) || "NotNull".equals(restricao) || "NotEmpty".equals(restricao)) {
+            return "CAMPO_OBRIGATORIO";
+        }
+        if ("Digits".equals(restricao)) {
+            return "PRECISAO_EXCEDIDA";
+        }
+        return "CAMPO_INVALIDO";
+    }
+
+    @ExceptionHandler(ConflitoException.class)
+    ResponseEntity<Resposta<Void>> conflito(ConflitoException e) {
+        ErroCampo erro = new ErroCampo("id", e.getCodigo(), e.getDetalhe());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Resposta.falha(e.getMessage(), List.of(erro)));
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})

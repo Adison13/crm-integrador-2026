@@ -160,7 +160,7 @@ class ContatosEUnidadesTest extends BaseIntegracao {
         mvc.perform(get("/api/crm/busca").param("q", "zeta").with(usuario(tenant, EMPRESA_VER_RESUMO, VER_RESUMO)))
                 .andExpect(jsonPath("$.data.length()").value(2))
                 .andExpect(jsonPath("$.data[1].id").value(contato))
-                .andExpect(jsonPath("$.data[1].rota").value("/crm/contatos/" + contato));
+                .andExpect(jsonPath("$.data[1].rota").value("/contatos/" + contato));
 
         mvc.perform(get("/api/crm/busca").param("q", "zeta").with(usuario(tenant, EMPRESA_VER_RESUMO)))
                 .andExpect(jsonPath("$.data.length()").value(1))

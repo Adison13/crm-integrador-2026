@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.plataforma.crm.api.CampoInvalidoException;
 import br.com.plataforma.crm.api.NaoEncontradoException;
+import br.com.plataforma.crm.api.Termos;
 import br.com.plataforma.crm.empresa.EmpresaRepositorio;
 import br.com.plataforma.crm.empresa.EmpresaServico;
 
@@ -46,7 +47,7 @@ public class ContatoServico {
 
     @Transactional(readOnly = true)
     public List<Contato> buscarPorTermo(String termo, int limite) {
-        return contatos.buscarPorTermo(termo.strip(), PageRequest.of(0, limite));
+        return contatos.buscarPorPadrao(Termos.padraoLike(termo), PageRequest.of(0, limite));
     }
 
     @Transactional
