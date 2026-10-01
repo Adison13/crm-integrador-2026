@@ -109,7 +109,7 @@ dos eventos, a busca global, e atividades, tarefas, reuniões e objeções.
 | Integrante | Papel |
 |---|---|
 | Adison de Oliveira Gontijo Magalhães | Gerente de projeto, back-end e DevOps |
-| Helwi | Análise e documentação |
-| Rafaela | UX/UI, prototipação e apoio ao back-end |
-| Arthur | QA e testes |
-| Matteo | QA e testes |
+| Helwi Salman Bahmad | Análise e documentação |
+| Rafaela Almeida de Lacerda | UX/UI, prototipação e apoio ao back-end |
+| Arthur Santos Lacerda | QA e testes |
+| Matteo Souza Caetano | QA e testes |
