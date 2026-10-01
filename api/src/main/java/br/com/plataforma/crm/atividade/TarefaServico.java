@@ -60,17 +60,21 @@ public class TarefaServico {
                 responsavel, dados.dataVencimento(), recorte.usuarioId())));
     }
 
+    /** Sem crm.oportunidade.editar, só o responsável mexe na própria tarefa, e sem repassá-la. */
     @Transactional
-    public TarefaDto editar(UUID id, EditarTarefa dados, Recorte recorte) {
-        Tarefa t = buscar(id, recorte);
+    public TarefaDto editar(UUID id, EditarTarefa dados, Recorte recorte, boolean editor) {
+        Tarefa t = buscarParaAlterar(id, recorte, editor);
         UUID responsavel = dados.responsavelId() != null ? dados.responsavelId() : t.getResponsavelId();
+        if (!editor && !responsavel.equals(t.getResponsavelId())) {
+            throw new AccessDeniedException("Repassar a tarefa exige crm.oportunidade.editar.");
+        }
         t.editar(dados.descricao().strip(), dados.tipo(), responsavel, dados.dataVencimento(), recorte.usuarioId());
         return TarefaDto.de(t);
     }
 
     @Transactional
-    public TarefaDto concluir(UUID id, Recorte recorte) {
-        Tarefa t = buscar(id, recorte);
+    public TarefaDto concluir(UUID id, Recorte recorte, boolean editor) {
+        Tarefa t = buscarParaAlterar(id, recorte, editor);
         if (!t.estaPendente()) {
             throw new ConflitoException("TAREFA_CONCLUIDA", "Esta tarefa já foi concluída.",
                     "Crie uma nova tarefa se ainda houver o que fazer.");
@@ -82,6 +86,14 @@ public class TarefaServico {
     @Transactional
     public void excluir(UUID id, Recorte recorte) {
         tarefas.delete(buscar(id, recorte));
+    }
+
+    private Tarefa buscarParaAlterar(UUID id, Recorte recorte, boolean editor) {
+        Tarefa t = buscar(id, recorte);
+        if (!editor && !recorte.usuarioId().equals(t.getResponsavelId())) {
+            throw new AccessDeniedException("Alterar tarefa de outra pessoa exige crm.oportunidade.editar.");
+        }
+        return t;
     }
 
     private Tarefa buscar(UUID id, Recorte recorte) {

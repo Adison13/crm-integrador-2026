@@ -30,6 +30,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/crm")
 public class TarefaController {
 
+    private static final String EDITAR = "crm.oportunidade.editar";
+
     private final TarefaServico servico;
 
     public TarefaController(TarefaServico servico) {
@@ -60,17 +62,17 @@ public class TarefaController {
     }
 
     @PutMapping("/tarefas/{id}")
-    @PreAuthorize("hasAuthority('crm.oportunidade.editar')")
+    @PreAuthorize("hasAnyAuthority('crm.oportunidade.editar', 'crm.oportunidade.ver')")
     public Resposta<TarefaDto> editar(@PathVariable UUID id, @Valid @RequestBody EditarTarefa corpo,
                                       @AuthenticationPrincipal Jwt jwt, Authentication autenticacao) {
-        return Resposta.ok(servico.editar(id, corpo, Recorte.de(jwt, autenticacao)));
+        return Resposta.ok(servico.editar(id, corpo, Recorte.de(jwt, autenticacao), editor(autenticacao)));
     }
 
     @PostMapping("/tarefas/{id}/concluir")
-    @PreAuthorize("hasAuthority('crm.oportunidade.editar')")
+    @PreAuthorize("hasAnyAuthority('crm.oportunidade.editar', 'crm.oportunidade.ver')")
     public Resposta<TarefaDto> concluir(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt,
                                         Authentication autenticacao) {
-        return Resposta.ok(servico.concluir(id, Recorte.de(jwt, autenticacao)));
+        return Resposta.ok(servico.concluir(id, Recorte.de(jwt, autenticacao), editor(autenticacao)));
     }
 
     @DeleteMapping("/tarefas/{id}")
@@ -85,5 +87,9 @@ public class TarefaController {
     public Resposta<List<TarefaDto>> daOportunidade(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt,
                                                     Authentication autenticacao) {
         return Resposta.ok(servico.daOportunidade(id, Recorte.de(jwt, autenticacao)));
+    }
+
+    private static boolean editor(Authentication autenticacao) {
+        return autenticacao.getAuthorities().stream().anyMatch(a -> EDITAR.equals(a.getAuthority()));
     }
 }

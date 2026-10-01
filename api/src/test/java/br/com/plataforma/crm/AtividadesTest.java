@@ -26,6 +26,8 @@ class AtividadesTest extends BaseIntegracao {
     private static final String[] VENDEDOR = {
             "crm.empresa.criar", "crm.oportunidade.ver", "crm.oportunidade.criar", "crm.oportunidade.editar"};
 
+    private static final String[] PRE_VENDAS = {"crm.empresa.criar", "crm.oportunidade.ver", "crm.oportunidade.criar"};
+
     private final String amanha = LocalDate.now().plusDays(1).toString();
 
     @Test
@@ -117,6 +119,37 @@ class AtividadesTest extends BaseIntegracao {
                 .andExpect(jsonPath("$.data.responsavelId").value(bruno.toString()));
         mvc.perform(get("/api/crm/tarefas").with(pessoa(tenant, bruno, List.of(), VENDEDOR)))
                 .andExpect(jsonPath("$.data.total").value(1));
+    }
+
+    @Test
+    void preVendasConcluiEEditaSoAPropriaTarefa() throws Exception {
+        UUID tenant = UUID.randomUUID();
+        UUID ana = UUID.randomUUID();
+        UUID pedro = UUID.randomUUID();
+        String equipe = UUID.randomUUID().toString();
+        String oportunidade = criarOportunidade(tenant, ana, List.of(equipe));
+        String doPedro = criarTarefa(tenant, ana, "{\"descricao\":\"Qualificar o lead\",\"oportunidadeId\":\""
+                + oportunidade + "\",\"responsavelId\":\"" + pedro + "\"}");
+        String daAna = criarTarefa(tenant, ana, "{\"descricao\":\"Enviar proposta\",\"oportunidadeId\":\""
+                + oportunidade + "\"}");
+
+        mvc.perform(put("/api/crm/tarefas/" + doPedro).with(pessoa(tenant, pedro, List.of(equipe), PRE_VENDAS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"descricao\":\"Qualificar o lead por telefone\",\"dataVencimento\":\""
+                                + OffsetDateTime.now(ZoneOffset.UTC).plusDays(2) + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.responsavelId").value(pedro.toString()));
+        mvc.perform(put("/api/crm/tarefas/" + doPedro).with(pessoa(tenant, pedro, List.of(equipe), PRE_VENDAS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"descricao\":\"Repassar\",\"responsavelId\":\"" + ana + "\"}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/api/crm/tarefas/" + daAna + "/concluir").with(pessoa(tenant, pedro, List.of(equipe), PRE_VENDAS)))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/api/crm/tarefas/" + doPedro + "/concluir").with(pessoa(tenant, pedro, List.of(equipe), PRE_VENDAS)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("concluida"));
+        mvc.perform(delete("/api/crm/tarefas/" + doPedro).with(pessoa(tenant, pedro, List.of(equipe), PRE_VENDAS)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -217,11 +250,15 @@ class AtividadesTest extends BaseIntegracao {
     }
 
     private String criarOportunidade(UUID tenant, UUID usuario) throws Exception {
+        return criarOportunidade(tenant, usuario, List.of());
+    }
+
+    private String criarOportunidade(UUID tenant, UUID usuario, List<String> equipes) throws Exception {
         String empresa = JsonPath.read(mvc.perform(post("/api/crm/empresas").with(pessoa(tenant, usuario, List.of(), VENDEDOR))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"razaoSocial\":\"Cliente " + UUID.randomUUID() + "\",\"origem\":\"manual\",\"origemModuloId\":\"crm\"}"))
                 .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.data.id");
-        return JsonPath.read(mvc.perform(post("/api/crm/oportunidades").with(pessoa(tenant, usuario, List.of(), VENDEDOR))
+        return JsonPath.read(mvc.perform(post("/api/crm/oportunidades").with(pessoa(tenant, usuario, equipes, VENDEDOR))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"titulo\":\"Backup\",\"empresaId\":\"" + empresa + "\",\"proximoPasso\":\"Ligar\","
                                 + "\"dataProximoPasso\":\"" + amanha + "\"}"))
