@@ -24,8 +24,8 @@ public class EmpresaServico {
     }
 
     @Transactional(readOnly = true)
-    public Page<Empresa> listar(Pageable pagina) {
-        return empresas.findAll(pagina);
+    public Page<Empresa> listar(FiltroEmpresas filtro, Pageable pagina) {
+        return empresas.findAll(filtro.especificacao(), pagina);
     }
 
     @Transactional(readOnly = true)

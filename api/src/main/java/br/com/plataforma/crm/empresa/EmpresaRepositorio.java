@@ -6,10 +6,11 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface EmpresaRepositorio extends JpaRepository<Empresa, UUID> {
+public interface EmpresaRepositorio extends JpaRepository<Empresa, UUID>, JpaSpecificationExecutor<Empresa> {
 
     @Query("select e from Empresa e where e.id = :id")
     Optional<Empresa> buscarPorId(UUID id);

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.plataforma.crm.api.CampoInvalidoException;
 import br.com.plataforma.crm.api.Lotes;
 import br.com.plataforma.crm.api.Pagina;
 import br.com.plataforma.crm.api.Resposta;
@@ -33,6 +34,8 @@ public class EmpresaController {
 
     private static final Map<String, String> CAMPOS_ORDENAVEIS = Map.of("criadoEm", "criadoEm", "razaoSocial", "razaoSocial");
 
+    private static final List<String> STATUS = List.of("lead", "prospect", "cliente_ativo", "inativo");
+
     private final EmpresaServico servico;
 
     public EmpresaController(EmpresaServico servico) {
@@ -43,9 +46,16 @@ public class EmpresaController {
     @PreAuthorize("hasAuthority('crm.empresa.ver')")
     public Resposta<Pagina<EmpresaDto>> listar(@RequestParam(defaultValue = "0") int pagina,
                                                @RequestParam(defaultValue = "20") int tamanho,
-                                               @RequestParam(defaultValue = "criadoEm,desc") String ordenar) {
+                                               @RequestParam(defaultValue = "criadoEm,desc") String ordenar,
+                                               @RequestParam(required = false) String segmento,
+                                               @RequestParam(required = false) String status) {
+        if (status != null && !STATUS.contains(status)) {
+            throw new CampoInvalidoException("status", "CAMPO_INVALIDO",
+                    "Status deve ser lead, prospect, cliente_ativo ou inativo.");
+        }
         PageRequest pedido = PageRequest.of(Math.max(pagina, 0), Math.clamp(tamanho, 1, 100), ordenacao(ordenar));
-        return Resposta.ok(Pagina.de(servico.listar(pedido), EmpresaDto::de));
+        FiltroEmpresas filtro = new FiltroEmpresas(segmento, status == null ? null : List.of(status), null, null, null);
+        return Resposta.ok(Pagina.de(servico.listar(filtro, pedido), EmpresaDto::de));
     }
 
     @GetMapping("/{id}")

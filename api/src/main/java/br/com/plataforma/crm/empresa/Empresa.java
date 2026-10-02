@@ -30,7 +30,9 @@ import jakarta.persistence.Transient;
 @SQLRestriction("deleted_at IS NULL")
 public class Empresa implements Persistable<UUID> {
 
-    static final String STATUS_INICIAL = "lead";
+    public static final String LEAD = "lead";
+    public static final String PROSPECT = "prospect";
+    static final String STATUS_INICIAL = LEAD;
 
     @Id
     private UUID id;
@@ -134,6 +136,19 @@ public class Empresa implements Persistable<UUID> {
         }
         this.atualizadoEm = OffsetDateTime.now(ZoneOffset.UTC);
         this.atualizadoPor = usuario;
+    }
+
+    /** Lead que virou oportunidade passa a prospect; prospect continua prospect. */
+    public void avancarParaProspect(UUID usuario) {
+        if (LEAD.equals(statusComercial)) {
+            statusComercial = PROSPECT;
+            atualizadoEm = OffsetDateTime.now(ZoneOffset.UTC);
+            atualizadoPor = usuario;
+        }
+    }
+
+    public boolean emProspeccao() {
+        return LEAD.equals(statusComercial) || PROSPECT.equals(statusComercial);
     }
 
     @PostLoad
