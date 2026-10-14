@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,9 +102,13 @@ public class ProspeccaoServico {
     }
 
     @Transactional
-    public void excluir(UUID id) {
-        tentativas.delete(tentativas.buscarPorId(id)
-                .orElseThrow(() -> new NaoEncontradoException("Tentativa não encontrada.")));
+    public void excluir(UUID id, UUID usuario, boolean editor) {
+        Tentativa tentativa = tentativas.buscarPorId(id)
+                .orElseThrow(() -> new NaoEncontradoException("Tentativa não encontrada."));
+        if (!editor && !usuario.equals(tentativa.getResponsavelId())) {
+            throw new AccessDeniedException("Excluir a tentativa de outra pessoa exige crm.oportunidade.editar.");
+        }
+        tentativas.delete(tentativa);
     }
 
     private void validarContato(UUID empresaId, UUID contatoId) {

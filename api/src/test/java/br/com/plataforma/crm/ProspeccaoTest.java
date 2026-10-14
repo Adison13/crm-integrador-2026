@@ -82,6 +82,25 @@ class ProspeccaoTest extends BaseIntegracao {
     }
 
     @Test
+    void excluirTentativaDeOutraPessoaExigeEditar() throws Exception {
+        UUID tenant = UUID.randomUUID();
+        String empresa = criarEmpresa(tenant, "Ponto Certo", "Varejo", "Goiania");
+        String minha = registrar(tenant, empresa, "{\"canal\":\"telefone\",\"resultado\":\"sem_resposta\"}");
+        String outra = registrar(tenant, empresa, "{\"canal\":\"email\",\"resultado\":\"sem_resposta\"}");
+
+        mvc.perform(delete("/api/crm/tentativas/" + minha)
+                        .with(pessoa(tenant, UUID.randomUUID(), List.of(), PRE_VENDAS)))
+                .andExpect(status().isForbidden());
+        mvc.perform(delete("/api/crm/tentativas/" + minha).with(eu(tenant, PRE_VENDAS)))
+                .andExpect(status().isOk());
+        mvc.perform(delete("/api/crm/tentativas/" + outra).with(pessoa(tenant, UUID.randomUUID(), List.of(),
+                        "crm.prospeccao.registrar", "crm.oportunidade.editar")))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/crm/empresas/" + empresa + "/tentativas").with(eu(tenant, SO_CONSULTA)))
+                .andExpect(jsonPath("$.data.total").value(0));
+    }
+
+    @Test
     void tentativaInvalidaSemPermissaoOuDeOutroTenantERecusada() throws Exception {
         UUID tenant = UUID.randomUUID();
         String empresa = criarEmpresa(tenant, "Bom Preco", "Varejo", "Anapolis");

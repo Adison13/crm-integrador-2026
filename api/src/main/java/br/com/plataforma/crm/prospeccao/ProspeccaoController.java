@@ -32,6 +32,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/crm")
 public class ProspeccaoController {
 
+    private static final String EDITAR = "crm.oportunidade.editar";
+
     private final ProspeccaoServico servico;
 
     public ProspeccaoController(ProspeccaoServico servico) {
@@ -77,8 +79,9 @@ public class ProspeccaoController {
 
     @DeleteMapping("/tentativas/{id}")
     @PreAuthorize("hasAuthority('crm.prospeccao.registrar')")
-    public Resposta<Void> excluir(@PathVariable UUID id) {
-        servico.excluir(id);
+    public Resposta<Void> excluir(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt,
+                                  Authentication autenticacao) {
+        servico.excluir(id, Usuarios.idDe(jwt), editor(autenticacao));
         return Resposta.ok(null);
     }
 
@@ -90,5 +93,9 @@ public class ProspeccaoController {
                                                                Authentication autenticacao) {
         OportunidadeDto criada = servico.converter(id, corpo, Recorte.de(jwt, autenticacao));
         return ResponseEntity.created(URI.create("/api/crm/oportunidades/" + criada.id())).body(Resposta.ok(criada));
+    }
+
+    private static boolean editor(Authentication autenticacao) {
+        return autenticacao.getAuthorities().stream().anyMatch(a -> EDITAR.equals(a.getAuthority()));
     }
 }
