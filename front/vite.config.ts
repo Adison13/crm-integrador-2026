@@ -12,6 +12,8 @@ export default defineConfig(({ mode }) => {
     // Servido na mesma origem da casca, sob /modulos/{codigo}/ (Contrato §12.8)
     base: `/modulos/${CODIGO}/`,
     plugins: [react(), tailwindcss()],
+    // @/ aponta para src/, como na casca (o mesmo em tsconfig.json)
+    resolve: { alias: { '@/': '/src/' } },
     server: {
       port: PORTA,
       strictPort: true,
