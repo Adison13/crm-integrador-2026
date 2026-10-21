@@ -96,8 +96,13 @@ export function definirSessaoDireta(nova: Sessao) {
   atualizar(nova)
 }
 
+/**
+ * Embutido, a casca renova e reenvia o token (plataforma:token). Em modo direto não há quem
+ * renove — o token de teste dura 15 minutos —, então a sessão acaba e a tela de entrada volta.
+ */
 export function avisarTokenExpirado() {
-  paraCasca({ tipo: 'modulo:token-expirado' })
+  if (embutido) paraCasca({ tipo: 'modulo:token-expirado' })
+  else atualizar(null)
 }
 
 /** Reflete a rota interna na URL da casca, para recarregar e voltar funcionarem (RF38). */
