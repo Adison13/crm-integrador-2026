@@ -27,6 +27,7 @@ módulos de Contratos e Financeiro por evento.
 | Tarefas | `/tarefas`, `/tarefas/{id}`, `/tarefas/{id}/concluir`, `/oportunidades/{id}/tarefas` | Minhas tarefas por vencimento e filtro de vencidas; tarefa solta só para quem criou e o responsável |
 | Reuniões | `/reunioes?de=&ate=`, `/oportunidades/{id}/reunioes`, `/reunioes/{id}`, `/reunioes/{id}/registro` | Agenda por período; o registro pós-reunião atualiza o próximo passo e grava as objeções |
 | Objeções | `/oportunidades/{id}/objecoes`, `/objecoes/{id}`, `/objecoes/frequentes` | Biblioteca dos motivos mais registrados no tenant |
+| Prospecção | `/prospeccao`, `/empresas/{id}/tentativas`, `/tentativas/{id}`, `/empresas/{id}/converter` | Fila de empresas em lead ou prospect com a última tentativa de contato; a conversão cria a oportunidade e passa o lead a prospect (cliente ativo responde 409); excluir a tentativa de outra pessoa exige `crm.oportunidade.editar` |
 | Busca global | `/busca?q=` | Até 5 resultados de empresas e contatos, no formato comum da casca |
 | Saúde | `/health` | Sem token |
 
@@ -51,7 +52,7 @@ front/   front React + TypeScript (Vite), carregado pela casca da plataforma
 ```
 
 Pacotes do back-end: `empresa`, `contato`, `funil`, `oportunidade`, `atividade`, `busca`, `eventos`,
-`seguranca`, `tenant` e `api` (envelope, paginação e tratamento de erros).
+`prospeccao`, `seguranca`, `tenant` e `api` (envelope, paginação e tratamento de erros).
 
 ## Rodar localmente
 
@@ -88,8 +89,8 @@ lado deste repositório.
 
 3. Confira em http://localhost:8082/api/crm/health e http://localhost:3002/modulos/crm/.
 
-Enquanto o login da plataforma não estiver publicado, os endpoints protegidos são exercitados
-pelos testes, com tokens simulados.
+Para chamar os endpoints protegidos, entre com um usuário de teste do identity
+(`docs/usuarios-de-teste.md` do `infra-integrador-2026`), pela casca ou pelo front em modo direto.
 
 ## Front
 
@@ -146,7 +147,7 @@ mvn verify
 
 Cobrem autenticação e permissões (401 e 403), isolamento entre tenants, token de serviço,
 duplicidade de empresa e contato, funis e etapas, o ciclo de vida da oportunidade, a publicação
-dos eventos, a busca global, e atividades, tarefas, reuniões e objeções.
+dos eventos, a busca global, atividades, tarefas, reuniões e objeções, e a prospecção.
 
 ## Equipe
 
@@ -154,6 +155,6 @@ dos eventos, a busca global, e atividades, tarefas, reuniões e objeções.
 |---|---|
 | Adison de Oliveira Gontijo Magalhães | Gerente de projeto, back-end e DevOps |
 | Helwi Salman Bahmad | Análise e documentação |
-| Rafaela Almeida de Lacerda | UX/UI, prototipação e apoio ao back-end |
+| Rafaela Almeida de Lacerda | UX/UI e desenvolvimento do front-end |
 | Arthur Santos Lacerda | QA e testes |
 | Matteo Souza Caetano | QA e testes |
