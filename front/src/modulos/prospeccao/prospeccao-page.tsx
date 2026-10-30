@@ -85,7 +85,7 @@ export function ProspeccaoPage() {
         )}
         {itens.length > 0 && (
           <>
-            <div className="overflow-x-auto rounded-xl border border-borda bg-superficie shadow-sm">
+            <div className="relative overflow-x-auto rounded-xl border border-borda bg-superficie shadow-sm">
               <table className="w-full min-w-[1000px] text-sm">
                 <thead className="border-b border-borda">
                   <tr>
