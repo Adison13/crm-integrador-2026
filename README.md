@@ -91,6 +91,50 @@ lado deste repositório.
 Enquanto o login da plataforma não estiver publicado, os endpoints protegidos são exercitados
 pelos testes, com tokens simulados.
 
+## Front
+
+O front chama a API pelo caminho relativo `/api/...`, como em produção (Contrato §12.8). Com a
+infraestrutura do `infra-integrador-2026` no ar (gateway em `:8080`):
+
+```bash
+cd front
+npm install
+npm run dev
+```
+
+e abra http://localhost:3002/modulos/crm/empresas. Aberto direto no navegador, o front pede login
+com um usuário de teste do identity (`docs/usuarios-de-teste.md`); dentro do iframe da casca a
+sessão chega por `postMessage` e o token nunca é guardado. Menu, cabeçalho, busca global e
+notificações são da casca: o módulo desenha só o conteúdo de cada tela, então no modo direto
+troca-se de tela pela URL (`/empresas`, `/contatos`, `/funil`, `/oportunidades`, `/tarefas`,
+`/agenda`, `/prospeccao`) — as mesmas rotas do submenu em `modulos/crm.json`.
+Para outro endereço de gateway, use `VITE_GATEWAY` no `.env.local`.
+
+| Tela | Rotas da API |
+|---|---|
+| Empresas | `/empresas`, `/empresas/{id}`, `/empresas/{id}/unidades`; status em lote no Financeiro, Contratos e Chamados |
+| Contatos | `/empresas/{id}/contatos`, `/contatos`, `/contatos/{id}` |
+| Funil de Vendas | `/funis` e `/funis/{id}` (criar, renomear, padrão, excluir), `/funis/{id}/etapas`, `/funis/{id}/etapas/ordem`, `/etapas/{id}`, `/oportunidades/{id}/mover` |
+| Oportunidades | `/oportunidades`, `/{id}`, `/ganhar`, `/perder`; dentro dela, `/atividades`, `/tarefas` (criar, editar, concluir, excluir), `/reunioes` (agendar, reagendar, cancelar, `/registro`) e `/objecoes` (com `/objecoes/frequentes` como sugestão) |
+| Tarefas | `/tarefas` (as minhas: pendentes, vencidas, concluídas ou todas), `/tarefas/{id}` (editar), `/tarefas/{id}/concluir` |
+| Agenda | `/reunioes?de=&ate=` (semana ou mês), `/reunioes/{id}` (reagendar, cancelar), `/reunioes/{id}/registro` |
+| Prospecção | `/prospeccao`, `/empresas/{id}/tentativas`, `/tentativas/{id}` (excluir), `/empresas/{id}/converter` |
+
+As ações aparecem conforme o claim `perms` do token (esconder é usabilidade; o back-end continua
+respondendo 403). Nomes de vendedor e responsável vêm do identity: `/usuarios` para quem tem
+`identity.usuario.ver`, os membros das próprias equipes para os demais.
+
+| Pasta | O que tem |
+|---|---|
+| `src/modulos/{dominio}/` | `*.types.ts`, `*.service.ts`, `use-*.ts`, `*-page.tsx`, `*.routes.tsx` e `components/` |
+| `src/model/` | Contrato da API, espelho dos records Java |
+| `src/components/ui/` | Componentes do design system, copiados da casca |
+| `src/desenvolvimento/` | Login de teste do modo direto (Contrato §12) |
+
+**Ainda sem rota no back-end, por isso fora da tela:** busca por texto e filtro de porte na
+lista de empresas, busca por texto em oportunidades e prospecção, listagem geral de contatos
+(a tela lista por empresa) e importação de planilha.
+
 ## Testes
 
 Precisa de Java 21, Maven e Docker (o Testcontainers sobe um PostgreSQL temporário):
