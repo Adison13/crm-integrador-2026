@@ -131,7 +131,7 @@ export const useRegistrarAtividade = (oportunidadeId: string) =>
 export const useExcluirAtividade = () =>
   useGravacao((id: string) => atividadesService.excluirAtividade(id), 'Atividade excluída.')
 
-export const useSalvarTarefa = (oportunidadeId: string) =>
+export const useSalvarTarefa = (oportunidadeId: string | null) =>
   useGravacao(({ id, form }: { id?: string; form: TFormTarefa }) => (id
     ? atividadesService.editarTarefa(id, paraTarefa(form))
     : atividadesService.criarTarefa({ ...paraTarefa(form), oportunidadeId })), 'Tarefa salva.')

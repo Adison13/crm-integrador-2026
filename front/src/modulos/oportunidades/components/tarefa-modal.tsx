@@ -8,7 +8,8 @@ import { TIPOS_DE_ATIVIDADE, type TFormTarefa } from '../oportunidades.types'
 import { formularioDaTarefa, useSalvarTarefa, validarTarefa } from '../use-atividades'
 
 interface Props {
-  oportunidadeId: string
+  /** Nulo na tela de Tarefas, que também lista tarefas sem oportunidade. */
+  oportunidadeId: string | null
   /** Sem tarefa, cria; com tarefa, edita. */
   tarefa?: TarefaDto
   /** Sem crm.oportunidade.editar, a tarefa fica com o próprio responsável (o back-end recusa repassar). */
@@ -43,7 +44,7 @@ export function TarefaModal({ oportunidadeId, tarefa, podeRepassar, aoFechar }: 
       onClose={aoFechar}
       size="lg"
       title={tarefa ? 'Editar tarefa' : 'Nova tarefa'}
-      subtitle="O que ainda precisa ser feito nesta oportunidade"
+      subtitle={oportunidadeId ? 'O que ainda precisa ser feito nesta oportunidade' : 'O que ainda precisa ser feito'}
       footer={
         <>
           <Button variant="outline" onClick={aoFechar}>Cancelar</Button>

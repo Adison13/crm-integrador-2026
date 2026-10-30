@@ -239,7 +239,8 @@ function Barra({ children }: { children: ReactNode }) {
   return <div className="mb-3 flex justify-end gap-2">{children}</div>
 }
 
-function BotaoIcone({ icone: Icone, rotulo, perigo, desabilitado, onClick }: {
+/** Ação de ícone de uma linha (também em Tarefas e Agenda). */
+export function BotaoIcone({ icone: Icone, rotulo, perigo, desabilitado, onClick }: {
   icone: LucideIcon; rotulo: string; perigo?: boolean; desabilitado?: boolean; onClick: () => void
 }) {
   return (

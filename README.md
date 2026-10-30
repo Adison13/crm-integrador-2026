@@ -106,7 +106,8 @@ e abra http://localhost:3002/modulos/crm/empresas. Aberto direto no navegador, o
 com um usuário de teste do identity (`docs/usuarios-de-teste.md`); dentro do iframe da casca a
 sessão chega por `postMessage` e o token nunca é guardado. Menu, cabeçalho, busca global e
 notificações são da casca: o módulo desenha só o conteúdo de cada tela, então no modo direto
-troca-se de tela pela URL (`/empresas`, `/contatos`, `/funil`, `/oportunidades`, `/prospeccao`).
+troca-se de tela pela URL (`/empresas`, `/contatos`, `/funil`, `/oportunidades`, `/tarefas`,
+`/agenda`, `/prospeccao`) — as mesmas rotas do submenu em `modulos/crm.json`.
 Para outro endereço de gateway, use `VITE_GATEWAY` no `.env.local`.
 
 | Tela | Rotas da API |
@@ -115,6 +116,8 @@ Para outro endereço de gateway, use `VITE_GATEWAY` no `.env.local`.
 | Contatos | `/empresas/{id}/contatos`, `/contatos`, `/contatos/{id}` |
 | Funil de Vendas | `/funis` e `/funis/{id}` (criar, renomear, padrão, excluir), `/funis/{id}/etapas`, `/funis/{id}/etapas/ordem`, `/etapas/{id}`, `/oportunidades/{id}/mover` |
 | Oportunidades | `/oportunidades`, `/{id}`, `/ganhar`, `/perder`; dentro dela, `/atividades`, `/tarefas` (criar, editar, concluir, excluir), `/reunioes` (agendar, reagendar, cancelar, `/registro`) e `/objecoes` (com `/objecoes/frequentes` como sugestão) |
+| Tarefas | `/tarefas` (as minhas: pendentes, vencidas, concluídas ou todas), `/tarefas/{id}` (editar), `/tarefas/{id}/concluir` |
+| Agenda | `/reunioes?de=&ate=` (semana ou mês), `/reunioes/{id}` (reagendar, cancelar), `/reunioes/{id}/registro` |
 | Prospecção | `/prospeccao`, `/empresas/{id}/tentativas`, `/tentativas/{id}` (excluir), `/empresas/{id}/converter` |
 
 As ações aparecem conforme o claim `perms` do token (esconder é usabilidade; o back-end continua

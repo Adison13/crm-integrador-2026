@@ -4,6 +4,8 @@ const MOEDA = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL
 const NUMERO_CURTO = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 })
 const DATA_HORA = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 const RELATIVO = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' })
+const HORA = new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' })
+const DIA_POR_EXTENSO = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
 
 export function moeda(valor: number | null | undefined) {
   return valor == null ? null : MOEDA.format(valor)
@@ -57,6 +59,28 @@ export function dataHora(iso: string | null | undefined) {
   return iso ? DATA_HORA.format(new Date(iso)) : null
 }
 
+/** Instante ISO → "14:30", no fuso do navegador. */
+export function hora(iso: string) {
+  return HORA.format(new Date(iso))
+}
+
+/** LocalDate "AAAA-MM-DD" → "segunda-feira, 27 de outubro". */
+export function diaPorExtenso(valor: string) {
+  return DIA_POR_EXTENSO.format(paraDataLocal(valor))
+}
+
+/** LocalDate "AAAA-MM-DD" → Date à meia-noite local (new Date("AAAA-MM-DD") seria meia-noite UTC, o dia anterior no Brasil). */
+export function paraDataLocal(valor: string) {
+  const [ano, mes, dia] = valor.slice(0, 10).split('-').map(Number)
+  return new Date(ano, mes - 1, dia)
+}
+
+/** Date → LocalDate "AAAA-MM-DD", pelo calendário local. */
+export function paraLocalDate(d: Date) {
+  const doisDigitos = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${doisDigitos(d.getMonth() + 1)}-${doisDigitos(d.getDate())}`
+}
+
 /** "há 5 minutos", "ontem", "há 3 dias". */
 export function haQuanto(iso: string | null | undefined) {
   if (!iso) return null
@@ -74,8 +98,7 @@ export function haQuanto(iso: string | null | undefined) {
 export function hoje(deslocamentoEmDias = 0) {
   const d = new Date()
   d.setDate(d.getDate() + deslocamentoEmDias)
-  const doisDigitos = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${doisDigitos(d.getMonth() + 1)}-${doisDigitos(d.getDate())}`
+  return paraLocalDate(d)
 }
 
 /** "São Paulo/SP", "São Paulo", "SP" ou nulo. */

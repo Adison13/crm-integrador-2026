@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { EditarOportunidade, MoverOportunidade, OportunidadeDto } from '@/model/oportunidade'
 import { notificarCasca } from '@/plataforma/sessao'
 import { numeroDe, valorParaCampo } from '@/lib/formato'
@@ -45,6 +45,20 @@ export function useOportunidade(id: string | undefined) {
     queryFn: () => oportunidadesService.buscar(id ?? ''),
     enabled: Boolean(id),
   })
+}
+
+/**
+ * Título das oportunidades que aparecem em Tarefas e Agenda. O CRM não tem rota em lote de
+ * oportunidades, então é um GET /oportunidades/{id} por id — no mesmo cache do detalhe. A que o
+ * usuário não enxerga (404) fica sem título.
+ */
+export function useTitulosDasOportunidades(ids: (string | null)[]) {
+  const unicos = [...new Set(ids.filter((id): id is string => Boolean(id)))]
+  const consultas = useQueries({
+    queries: unicos.map((id) => ({ queryKey: oportunidadesKeys.detalhe(id), queryFn: () => oportunidadesService.buscar(id) })),
+  })
+  const porId = new Map(consultas.flatMap((c) => (c.data ? [[c.data.id, c.data.titulo] as const] : [])))
+  return (id: string | null) => (id ? porId.get(id) : undefined)
 }
 
 // ------------------------------------------------------------------ formulário
