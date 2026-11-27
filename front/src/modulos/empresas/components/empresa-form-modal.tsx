@@ -1,12 +1,12 @@
-import { useState, type FormEvent } from 'react'
-import { Save } from 'lucide-react'
+import { useRef, useState, type FormEvent } from 'react'
+import { Save, Search } from 'lucide-react'
 import { Button, FormField, FormSection, Input, Modal, Select } from '@/components/ui'
 import type { EmpresaDto, StatusComercial } from '@/model/empresa'
 import { useUsuarios } from '@/hooks/use-usuarios'
-import { idDoDuplicado, separarErros } from '@/lib/erros'
-import { cnpj } from '@/lib/formato'
+import { idDoDuplicado, mensagemDe, separarErros } from '@/lib/erros'
+import { cnpj, somenteDigitos } from '@/lib/formato'
 import { PORTES, SEGMENTOS, STATUS_COMERCIAL, UFS, type TFormEmpresa } from '../empresas.types'
-import { formularioDe, useSalvarEmpresa, validarEmpresa } from '../use-empresas'
+import { formularioDe, preencherVazios, useConsultarCnpj, useSalvarEmpresa, validarEmpresa } from '../use-empresas'
 
 interface Props {
   /** Sem empresa, cria; com empresa, edita. */
@@ -22,6 +22,9 @@ export function EmpresaFormModal({ empresa, aoFechar, aoSalvar, aoAbrirExistente
   const [form, setForm] = useState<TFormEmpresa>(() => formularioDe(empresa))
   const [errosLocais, setErrosLocais] = useState<Record<string, string>>({})
   const salvar = useSalvarEmpresa()
+  const consultar = useConsultarCnpj()
+  /** Último CNPJ consultado, para a busca automática ao sair do campo não repetir a mesma consulta. */
+  const cnpjConsultado = useRef('')
   const { opcoes } = useUsuarios()
   const editando = Boolean(empresa)
 
@@ -35,6 +38,33 @@ export function EmpresaFormModal({ empresa, aoFechar, aoSalvar, aoAbrirExistente
     setForm((atual) => ({ ...atual, [campo]: valor }))
     setErrosLocais(({ [campo]: _removido, ...resto }) => resto)
     if (salvar.error) salvar.reset()
+  }
+
+  function mudarCnpj(valor: string) {
+    mudar('cnpj', valor)
+    if (!consultar.isIdle) consultar.reset()
+  }
+
+  /** Falha (404, 503, sem rede...) só mostra a mensagem: o preenchimento manual continua valendo. */
+  function buscarDados() {
+    if (consultar.isPending) return
+    const digitos = somenteDigitos(form.cnpj)
+    if (digitos.length !== 14) {
+      setErrosLocais((atual) => ({ ...atual, cnpj: 'O CNPJ deve ter 14 dígitos.' }))
+      return
+    }
+    cnpjConsultado.current = digitos
+    consultar.mutate(digitos, {
+      // Função de atualização: pega o que o usuário digitou enquanto a consulta rodava
+      onSuccess: (dados) => setForm((atual) => preencherVazios(atual, dados)),
+    })
+  }
+
+  /** Ao sair do campo com 14 dígitos novos, busca sozinho. Só no cadastro; na edição, só pelo botão. */
+  function aoSairDoCnpj() {
+    if (editando) return
+    const digitos = somenteDigitos(form.cnpj)
+    if (digitos.length === 14 && digitos !== cnpjConsultado.current) buscarDados()
   }
 
   function enviar(evento: FormEvent) {
@@ -81,9 +111,21 @@ export function EmpresaFormModal({ empresa, aoFechar, aoSalvar, aoAbrirExistente
             <Input id="empresa-fantasia" value={form.nomeFantasia} maxLength={255} placeholder="Ex.: Horizonte"
               onChange={(e) => mudar('nomeFantasia', e.target.value)} />
           </FormField>
-          <FormField label="CNPJ" htmlFor="empresa-cnpj" error={erros.cnpj}>
-            <Input id="empresa-cnpj" value={cnpj(form.cnpj) ?? ''} inputMode="numeric" placeholder="00.000.000/0000-00" invalid={Boolean(erros.cnpj)}
-              onChange={(e) => mudar('cnpj', e.target.value)} />
+          <FormField
+            label="CNPJ"
+            htmlFor="empresa-cnpj"
+            error={erros.cnpj ?? (consultar.isError ? mensagemDe(consultar.error) : null)}
+            hint={consultar.isSuccess && 'Dados da Receita aplicados nos campos vazios. Revise antes de salvar.'}
+          >
+            <div className="flex gap-2">
+              <Input id="empresa-cnpj" className="min-w-0 flex-1" value={cnpj(form.cnpj) ?? ''} inputMode="numeric" placeholder="00.000.000/0000-00"
+                invalid={Boolean(erros.cnpj) || consultar.isError} onChange={(e) => mudarCnpj(e.target.value)} onBlur={aoSairDoCnpj} />
+              {!editando && (
+                <Button variant="outline" loading={consultar.isPending} onClick={buscarDados}>
+                  {consultar.isPending ? 'Buscando...' : <><Search aria-hidden className="size-4" />Buscar dados</>}
+                </Button>
+              )}
+            </div>
           </FormField>
           {duplicada && (
             <div className="md:col-span-2">
