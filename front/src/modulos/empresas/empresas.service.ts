@@ -1,9 +1,16 @@
-import type { EditarEmpresa, EmpresaDto, EmpresaResumoDto, NovaEmpresa, UnidadeDto } from '@/model/empresa'
+import type { CnpjDto, EditarEmpresa, EmpresaDto, EmpresaResumoDto, NovaEmpresa, UnidadeDto } from '@/model/empresa'
 import { chamar, type Pagina } from '@/plataforma/api'
 import { consulta, corpo } from '@/lib/consulta'
+import { somenteDigitos } from '@/lib/formato'
 import type { TFiltroEmpresas } from './empresas.types'
 
 const BASE = '/api/crm/empresas'
+
+/**
+ * O back espera até 3 s pela Receita antes de devolver 503. Este limite é maior para o front
+ * receber essa resposta (com a mensagem certa) em vez de desistir antes.
+ */
+const TEMPO_LIMITE_CNPJ = 10_000
 
 /** Empresas do tenant (EmpresaController). */
 export const empresasService = {
@@ -35,5 +42,14 @@ export const empresasService = {
 
   editar(id: string, dados: EditarEmpresa) {
     return chamar<EmpresaDto>(`${BASE}/${id}`, { method: 'PUT', body: corpo(dados) })
+  },
+
+  /**
+   * Dados cadastrais do CNPJ na Receita, pelo nosso back (CnpjController) — o navegador nunca
+   * fala direto com a BrasilAPI. Exige crm.empresa.criar. 400 se não tiver 14 dígitos, 404 se a
+   * Receita não conhece o CNPJ, 503 se a consulta estiver fora do ar (o cadastro manual segue valendo).
+   */
+  consultarCnpj(cnpj: string) {
+    return chamar<CnpjDto>(`/api/crm/cnpj/${somenteDigitos(cnpj)}`, { signal: AbortSignal.timeout(TEMPO_LIMITE_CNPJ) })
   },
 }

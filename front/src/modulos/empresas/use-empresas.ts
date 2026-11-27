@@ -1,9 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { EditarEmpresa, EmpresaDto, NovaEmpresa } from '@/model/empresa'
+import type { CnpjDto, EditarEmpresa, EmpresaDto, NovaEmpresa } from '@/model/empresa'
 import { notificarCasca } from '@/plataforma/sessao'
 import { somenteDigitos } from '@/lib/formato'
 import { empresasService } from './empresas.service'
-import { FILTRO_INICIAL, ORIGEM_DA_TELA, type TFiltroEmpresas, type TFormEmpresa } from './empresas.types'
+import { FILTRO_INICIAL, ORIGEM_DA_TELA, PORTES, UFS, type TFiltroEmpresas, type TFormEmpresa } from './empresas.types'
 import { statusExternosService } from './status-externos.service'
 
 export const TAMANHO_DA_PAGINA = 20
@@ -109,6 +109,51 @@ export function validarEmpresa(form: TFormEmpresa): Record<string, string> {
 }
 
 const ouNulo = (texto: string) => texto.trim() || null
+
+const semAcento = (texto: string) => texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+
+/**
+ * A Receita classifica o porte como ME, EPP ou "Demais"; a tela oferece Pequeno, Médio e Grande.
+ * Só converte o que tem correspondência clara; o resto fica em branco para o usuário escolher.
+ */
+function porteDaLista(porte: string | null) {
+  if (!porte) return ''
+  const texto = semAcento(porte)
+  const igual = PORTES.find((p) => semAcento(p) === texto)
+  if (igual) return igual
+  if (/micro|pequen/.test(texto)) return 'Pequeno'
+  if (/^medi/.test(texto)) return 'Médio'
+  if (/grande/.test(texto)) return 'Grande'
+  return ''
+}
+
+/** UF só entra se existir no select; qualquer outra coisa deixaria o campo com valor invisível. */
+function ufDaLista(estado: string | null) {
+  const uf = estado?.trim().toUpperCase() ?? ''
+  return UFS.includes(uf) ? uf : ''
+}
+
+/**
+ * Aplica os dados do CNPJ só nos campos que ainda estão vazios: o que o usuário digitou nunca é
+ * sobrescrito. Segmento, vendedor e status não vêm da Receita e ficam como estão.
+ */
+export function preencherVazios(form: TFormEmpresa, dados: CnpjDto): TFormEmpresa {
+  const vazio = (texto: string) => !texto.trim()
+  const ou = (atual: string, novo: string | null) => (vazio(atual) ? (novo?.trim() ?? '') : atual)
+  return {
+    ...form,
+    razaoSocial: ou(form.razaoSocial, dados.razaoSocial),
+    nomeFantasia: ou(form.nomeFantasia, dados.nomeFantasia),
+    cidade: ou(form.cidade, dados.cidade),
+    estado: vazio(form.estado) ? ufDaLista(dados.estado) : form.estado,
+    porte: vazio(form.porte) ? porteDaLista(dados.porte) : form.porte,
+  }
+}
+
+/** Consulta o CNPJ na Receita. Quem chama decide o que fazer com o resultado (ver preencherVazios). */
+export function useConsultarCnpj() {
+  return useMutation({ mutationFn: (cnpj: string) => empresasService.consultarCnpj(cnpj) })
+}
 
 function comuns(form: TFormEmpresa) {
   return {

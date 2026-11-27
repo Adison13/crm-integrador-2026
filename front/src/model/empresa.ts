@@ -69,3 +69,16 @@ export interface EmpresaResumoDto {
   cnpj: string | null
   cidade: string | null
 }
+
+/**
+ * CnpjDto — GET /api/crm/cnpj/{cnpj}. Só o que o cadastro usa, vindo da Receita (via BrasilAPI).
+ * Qualquer campo pode vir nulo: a Receita nem sempre informa nome fantasia, por exemplo.
+ */
+export interface CnpjDto {
+  razaoSocial: string | null
+  nomeFantasia: string | null
+  cidade: string | null
+  /** Sigla da UF, 2 letras. */
+  estado: string | null
+  porte: string | null
+}
